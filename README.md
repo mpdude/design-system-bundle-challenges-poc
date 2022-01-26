@@ -1,4 +1,11 @@
-# Proof of Concept for loading SCSS from NPM packages installed through local links
+# "Design System Bundle" POC
+
+How can we install a PHP package through Composer, and then
+
+* follow NPM dependencies declared by the version installed,
+* refer to SCSS files _in_ that package
+* refer to other SCSS files in NPM packages required _by_ that package
+* avoid mixing incompatible library versions _across_ NPM packages?
 
 ## Following transitive NPM dependencies
 
