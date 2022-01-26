@@ -4,7 +4,8 @@
   "license": "MIT",
   "dependencies": {
     "foo": "portal:./packages/foo",
-    "svala": "0.2.0",
+    "jquery": "^1.0",
+    "svala": "0.1.0",
     "webfactory-gulp-preset": "webfactory/webfactory-gulp-preset#sass-use-importer"
   },
   "packageManager": "yarn@3.1.1"

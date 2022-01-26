@@ -4,5 +4,8 @@
   "license": "MIT",
   "dependencies": {
     "svala": "0.1.0"
+  },
+  "peerDependencies": {
+    "jquery": "^3.0"
   }
 }
