@@ -1,0 +1,11 @@
+{
+  "name": "yarn-example",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "foo": "portal:./packages/foo",
+    "svala": "0.2.0",
+    "webfactory-gulp-preset": "webfactory/webfactory-gulp-preset#sass-use-importer"
+  },
+  "packageManager": "yarn@3.1.1"
+}
