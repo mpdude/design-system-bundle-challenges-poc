@@ -1,0 +1,12 @@
+{
+	"version": 3,
+	"file": "styles.css",
+	"sources": [
+		"styles.scss",
+		"foo/_partials.scss",
+		"foo/bar/_mixins.scss",
+		"foo/bar/baz/_functions.scss"
+	],
+	"names": [],
+	"mappings": "ACEA,AAAA,KAAK,CAAC;ECCF,gBAAgB,ECFR,aAAK;CFGhB"
+}

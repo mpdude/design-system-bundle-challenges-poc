@@ -1,0 +1,5 @@
+@import "baz/functions";
+
+@mixin cool-background-image {
+    background-image: get-url("cool");
+}

@@ -1,0 +1,5 @@
+@import "bar/mixins";
+
+.cool {
+    @include cool-background-image;
+}

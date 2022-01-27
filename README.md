@@ -127,4 +127,10 @@ Update the main `package.json` to use `jquery ^3.0`. The warning goes away when 
 * Resolve the `url()` relative to that file
 * When no match was found (and/or possibly the URL starts with a special `~packagename` identifier?), apply the `require()` loading mechanism to traverse the `node_modules` hierarchy; start at the SCSS file containing the URL.
 * If necessary/helpful, change URLs to absolute, file-system based paths during processing. Use a final [postcss-url](https://github.com/postcss/postcss-url) step to gather files in a public `dist` area and change URL paths accordingly.
-* 
+
+### SASS Rabbit Hole?
+
+The [sass-maze](sass-maze) folder illustrates the challenges that may arise.
+
+Compile `styles.scss` to `.css` by running `npx node-sass styles.scss --output . --output-style expanded --source-map true` and inspect the source map with a tool like http://sokra.github.io/source-map-visualization/#custom.
+

@@ -1,0 +1,3 @@
+@function get-url($temp) {
+    @return url(#{$temp}.png)
+}
