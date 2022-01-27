@@ -2,7 +2,7 @@
 
 How can we install a PHP package through Composer, and then
 
-* follow NPM dependencies declared by the version installed,
+* also fetch NPM dependencies declared by the version installed,
 * refer to SCSS files _in_ that package
 * refer to other SCSS files in NPM packages required _by_ that package
 * avoid mixing incompatible library versions _across_ NPM packages?
