@@ -7,13 +7,15 @@ How can we install a PHP package through Composer, and then
 * refer to other SCSS files in NPM packages required _by_ that package
 * avoid mixing incompatible library versions _across_ NPM packages?
 
-## Following transitive NPM dependencies
+## Following transitive NPM dependencies for a "local" package
 
 ### Assumptions
 
-* We have something (our "design system bundle") that looks like an NPM package – i. e. contains a `package.json` file declaring NPM package dependencies.
-* This "design system bundle" is installed through other means (for example, Composer) because we need to make sure other dependencies (PHP) match and are followed.
-* After the "design system bundle" has been fetched, the NPM dependencies declared by it (in the "design system bundle" version chosen by the other package manager) have to be followed.
+* We have something (our "design system bundle") that looks like an NPM package – i. e. contains a `package.json` file declaring NPM package dependencies. 
+* This "local package" is installed through other means (for example, Composer) because we need to make sure other dependencies (PHP) match and are followed.
+* After the local package has been fetched through other means, the NPM dependencies declared by it (in the version checked out by the other package manager) have to be followed.
+* The `link:` protocol in Yarn v1 does not set up `node_modules` in that local package. Its purpose is [somewhat explained in the Yarn V2 docs](https://yarnpkg.com/features/protocols#whats-the-difference-between-link-and-portal). The [initial implementation](https://github.com/yarnpkg/yarn/pull/3359) is not very clear on the semantics of a `link:`, and [other people were confused as well](https://github.com/yarnpkg/yarn/issues/5341).
+* At least in the past, there [were issues](https://github.com/yarnpkg/yarn/pull/2860) with `file:` references that would copy the local package into the cache but use the cache from then on, effectively never picking up local changes. Additionally, the copy performed by `file:` is slow, expensive and gets in the way when you need to make changes to the local package.
 
 ### Solution
 
