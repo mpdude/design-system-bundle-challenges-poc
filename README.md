@@ -110,3 +110,10 @@ Update the main `package.json` to use `jquery ^3.0`. The warning goes away when 
   * Assume two packages declare a dependency on `some-iconset` in `v1` and `v2`, respectively. Then the same `url()` in SASS files of either package needs to resolve to (possibly) different image files.
 * URL rebasing needs to collect the referenced assets from the package and `node_modules` tree, which may not be publicly accessible at all. Targeted files need to be copied to a public directory. Possible filename clashes (previous example) need to be dealt with.
 
+### Solution ideas
+
+* Again, use the SASS Importer to find `url()` references whilst a SASS file is being loaded
+* Rewrite all `url()` to be absolute file paths on disk; based on the current file path – temporary solution while CSS is being compiled
+* For assets in `node_modules`, possible hoisting must be taken into account
+* Clean up final CSS with something like [postcss-url](https://github.com/postcss/postcss-url), replacing filesystem-based absolute paths with paths to a public staging directory where assets are being collected
+* Problem: SASS Importer not being used when imports can be resolved directly (e. g. `@import "some/partial"` will find `./some/_partial.scss` without invoking the  Importer).
