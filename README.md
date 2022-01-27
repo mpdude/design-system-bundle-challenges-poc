@@ -117,3 +117,14 @@ Update the main `package.json` to use `jquery ^3.0`. The warning goes away when 
 * For assets in `node_modules`, possible hoisting must be taken into account
 * Clean up final CSS with something like [postcss-url](https://github.com/postcss/postcss-url), replacing filesystem-based absolute paths with paths to a public staging directory where assets are being collected
 * Problem: SASS Importer not being used when imports can be resolved directly (e. g. `@import "some/partial"` will find `./some/_partial.scss` without invoking the  Importer).
+
+### Solution ideas 2
+
+* https://github.com/bholloway/resolve-url-loader/blob/HEAD/packages/resolve-url-loader/docs/how-it-works.md – This is for Webpack, but maybe the general idea still holds.
+* After the final CSS has been generated, the sourcemap tells which original SCSS file contributed each character in the CSS. 
+* Find `url()` references in the CSS
+* Look up the originating SCSS file by means of the sourcemap
+* Resolve the `url()` relative to that file
+* When no match was found (and/or possibly the URL starts with a special `~packagename` identifier?), apply the `require()` loading mechanism to traverse the `node_modules` hierarchy; start at the SCSS file containing the URL.
+* If necessary/helpful, change URLs to absolute, file-system based paths during processing. Use a final [postcss-url](https://github.com/postcss/postcss-url) step to gather files in a public `dist` area and change URL paths accordingly.
+* 
