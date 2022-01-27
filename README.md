@@ -5,15 +5,19 @@ How can we install a PHP package through Composer, and then
 * also fetch NPM dependencies declared by the version installed,
 * refer to SCSS files _in_ that package
 * refer to other SCSS files in NPM packages required _by_ that package
-* avoid mixing incompatible library versions _across_ NPM packages?
+* avoid mixing incompatible library versions _across_ NPM packages
+* reference assets (like images) from and across such NPM packages?
 
 ## Following transitive NPM dependencies for a "local" package
 
-### Assumptions
+### Challenge
 
 * We have something (our "design system bundle") that looks like an NPM package – i. e. contains a `package.json` file declaring NPM package dependencies. 
 * This "local package" is installed through other means (for example, Composer) because we need to make sure other dependencies (PHP) match and are followed.
-* After the local package has been fetched through other means, the NPM dependencies declared by it (in the version checked out by the other package manager) have to be followed.
+* After the local package has been installed through other means, the NPM dependencies declared by it (in the version checked out by the other package manager) have to be fetched as well.
+
+### Problems 
+
 * The `link:` protocol in Yarn v1 does not set up `node_modules` in that local package. Its purpose is [somewhat explained in the Yarn V2 docs](https://yarnpkg.com/features/protocols#whats-the-difference-between-link-and-portal). The [initial implementation](https://github.com/yarnpkg/yarn/pull/3359) is not very clear on the semantics of a `link:`, and [other people were confused as well](https://github.com/yarnpkg/yarn/issues/5341).
 * At least in the past, there [were issues](https://github.com/yarnpkg/yarn/pull/2860) with `file:` references that would copy the local package into the cache but use the cache from then on, effectively never picking up local changes. Additionally, the copy performed by `file:` is slow, expensive and gets in the way when you need to make changes to the local package.
 
@@ -22,6 +26,7 @@ How can we install a PHP package through Composer, and then
 * Use Yarn v2 and `protal:` link types
 * https://yarnpkg.com/getting-started/migration describes how to get there
 * Should work out of the box for anyone (i. e. no need to know up-front whether it's Yarn v1 or v2?)
+* Local package will by symlinked into the top-level `node_modules` folder. It may have its own `node_modules` folder set up, depending on whether that is necessary or package hoisting will be performed.
 
 ### Example
 
@@ -35,18 +40,19 @@ Since the main `package.json` file declared `svala` v0.2.0 as a dependency, no h
 
 ## Using `@import` in SCSS to refer to NPM packages
 
-### Assumptions
+### Challenge
 
 * SCSS files need to be able to reference SCSS partials that are shipped as part of NPM packages
-* When an SCSS file in the example `packages/foo` subpackage (our "design system bundle") `@imports` from `svala/...`, it should get the version declared in its own `package.json`. 
+* When an SCSS file in the example `packages/foo` subpackage (our "design system bundle") `@imports` from `svala/...`, it should get the version declared _in its own_ `package.json`. 
 * An SCSS file in the "main" project (like `scss/main.scss`) should be able to ...
   * `@import` from the `foo` package
-  * `@import` from `svala`, but get its own declared `svala` version then
+  * `@import` from `svala`, but also _get its own_ declared `svala` version then
 * In case the main project and a subpackage end up using the same version of dependencies and hoisting is performed by Yarn, SASS path resolution must work as NPM's `require()` semantics dictate.
 
 ### Solution
 
-* Use a custom `node-sass` [Importer](https://github.com/sass/node-sass#importer--v200---experimental). Importers can provide custom behaviour for `@import` SASS statements. SASS will first try to resolve the given import URL relative to the file containing the `@import` statement. After that, the Importer(s) will be run. If those are not successful, all SASS include paths will be tried as starting points.
+* Use a custom `node-sass` [Importer](https://github.com/sass/node-sass#importer--v200---experimental). Importers can provide custom behaviour for `@import` SASS statements. 
+* SASS will first try to resolve the given import URL relative to the file containing the `@import` statement. After that, the Importer(s) will be run. If those are not successful, all SASS `includePaths` will be tried as starting points.
 * https://github.com/anarh/node-sass-import implements Node.js `require()`-style lookup behaviour for SASS
   * https://github.com/maoberlehner/node-sass-magic-importer looks promising as well with rich additional feature set, but: https://github.com/maoberlehner/node-sass-magic-importer/issues/188 – it does not honor the location of the file currently processed by SASS, thus not doing Node.js-style "searches" for `node_modules`, but effectively using only `node_modules` in the `cwd`.
 * Write `@import "package/..."` in SASS. If `package` is not a subdirectory right next to the file being processed, it will be treated as an NPM package name.
@@ -65,18 +71,18 @@ Now, change the toplevel `package.json` to require `svala: v0.1.0`, like the one
 
 ## Dealing with conflicting NPM dependencies ("there can only be one")
 
-### Assumptions
+### Challenge
 
-* In some cases – probably like the SCSS imports demonstrated previously – the language (SCSS/CSS) may be able to deal with different versions of a package being installed. As long as SASS mixins or partials boil down to "local" CSS, it might be feasible to mix different versions of a package providing SASS files in a single resulting CSS file.
-* This won't work for JavaScript/ECMAScript dependencies shared by the project and the "design system bundle", at least unless sophisticated bundling/scoping/... can be applied.
-  * E. g. when the main project requires jQuery 3, the "design system bundle" however declares a jQuery 1 dependency, it's no use to get both versions installed at different locations in the `node_modules` tree
-  * As of writing, we're not able to bundle our scripts in a way that would provide the right jQuery version to each part
+* In some cases – like the SCSS imports demonstrated previously – the language (SCSS/CSS) may be able to deal with different versions of a package being installed. As long as SASS mixins or partials boil down to generating CSS snippets, it might be feasible to mix different versions of a package providing SASS files in a single resulting CSS file.
+* This won't work for JavaScript/ECMAScript dependencies shared by the project and the other packages, at least unless sophisticated bundling/scoping/... can be applied.
+  * E. g. when the main project requires jQuery 3, the "design system bundle" however declares a jQuery 1 dependency, it's no use to get both versions installed at different locations in the `node_modules` tree.
+  * As of writing, we're not able to bundle our scripts in a way that would provide the right jQuery version to each part.
   * For performance reasons (in the jQuery example), we'd rather see things fail fast instead of mixing installations.
 
 ### Solution
 
 * It's a core design feature for Yarn/NPM to deal with "concurrent" package versions, since that is possible in the language (prototype-based inheritance in ECMAScript) – opposed to e. g. Composer/PHP.
-* Use `peerDependency` declarations in the "design system bundle"
+* Use `peerDependency` declarations in the "design system bundle":
   * Will _not_ install a copy/alternative version in the sub-package
   * Will print a warning for missing/unmatched `peerDependency` (in Yarn v2, it's printed on every `yarn install` and `yarn explain peer-requirements ...` can be used to diagnose
   * `yarn check` has been removed in v2, but maybe the build could be failed otherwise
