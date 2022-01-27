@@ -97,14 +97,14 @@ Update the main `package.json` to use `jquery ^3.0`. The warning goes away when 
 
 ## Referencing assets from NPM packages in SASS/CSS `url()`s, rebasing
 
-### Assumptions
+### Challenge
 
 * In SCSS, you need to reference assets (like images, icons) that may be part of NPM packages.
 * It would be beneficial if we could use `url(...)` paths _relative to the file that contains the statement_:
   * Can be understood/followed/auto-completed by IDEs without knowning how SASS files will be compiled and/or nested (imported) into each other
   * No need to define per-package prefixes externally
   * You should be able to reason about what an SCSS file does by looking at the file only, where it is located within its own package and maybe what dependencies are declared by that package.
-* Problem: SCSS is imported/used across many levels, and an `url()` statement is just a CSS rule that may end up in CSS file in completely different locations
+* Problem: SCSS is imported/used across many levels. The `url()` statement is just a CSS rule that may end up in CSS file in completely different locations, but is not processed during SASS compilation.
 * Due to that, we need to rebase URLs anyway. But: Currently, rebasing happens _after_ SCSS has been compiled down to CSS, not _for every SCSS file individually_.
 * As with SCSS files themselves, if we want to reference assets from NPM packages, `require()` semnatics and/or hoisting rules need to be known
   * Assume two packages declare a dependency on `some-iconset` in `v1` and `v2`, respectively. Then the same `url()` in SASS files of either package needs to resolve to (possibly) different image files.
